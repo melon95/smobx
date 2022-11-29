@@ -1,11 +1,12 @@
-import { startBatch, endBatch } from './tools'
-import { generatorObservable } from './objservableObjectAdm'
+import { startBatch, endBatch } from './tools/index.js'
+import { generatorObservable } from './class/objservableObjectAdm.js'
 
 export function makeObservable(target: any, annotations: any) {
   startBatch()
-  const adm = generatorObservable(target)
+  // 创建adm对象
+  const adm = generatorObservable(target).$mobx
   Object.keys(annotations).forEach((key) => {
-    adm.defineProperty(key, annotations[key], target[key])
+    annotations[key].extend(key, target[key], adm)
   })
   endBatch()
   return adm.proxy

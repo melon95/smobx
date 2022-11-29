@@ -1,13 +1,29 @@
-import { makeObservable } from "./src/makeObservable";
+import {
+  makeObservable,
+  observable,
+  actionBound,
+  autoRun,
+} from './src/index.js'
 
-const observableValue = makeObservable({
-  a: 'string',
-  b: 1,
-  c: true
-}, {
-  a: '1',
-  b: '2',
-  c: 3
+const observableValue = makeObservable(
+  {
+    a: 'i am a string',
+    b() {
+      this.a = 'i am a new string'
+    },
+    c: true,
+  },
+  {
+    a: observable,
+    b: actionBound,
+  }
+)
+// console.log(observableValue.a)
+
+autoRun(() => {
+  console.log('autorun：', observableValue.a)
 })
 
-console.log(observableValue.a)
+// observableValue.b()
+
+observableValue.a = 'change in outside'

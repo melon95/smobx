@@ -1,9 +1,12 @@
 const objectProxyTrap = {
   get(target: any, key: string) {
-    return target.adm.get(key)
+    return target.$mobx.get(key)
   },
   set(target: any, key: string, value: any) {
-    return target.adm.set(key, value)
+    if (key === '$mobx') {
+      return Reflect.set(target, key, value)
+    }
+    return target.$mobx.set(key, value)
   },
 }
 
