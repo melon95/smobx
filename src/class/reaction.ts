@@ -1,33 +1,37 @@
-import { globalState, startBatch, endBatch } from '../tools/index.js'
+import { globalState, track } from '../tools/index.js'
 let reactionId = 0
 export class Reaction {
   observer = new Set()
+  newObserver = new Set()
   id = reactionId++
   cb
   constructor(cb) {
     this.cb = cb
   }
 
+  onBecomeStale() {
+    this.scheduler()
+  }
+
   scheduler() {
-    runReaction(this)
+    globalState.pendingReactions.push(this)
+    runReaction()
   }
 
   track() {
-    startBatch()
-    const pre = globalState.reaction
-    globalState.reaction = this
-    this.cb()
-    globalState.reaction = pre
-    endBatch()
+    return track(this.cb, this, this)
   }
 }
 
-export function runReaction(reaction: Reaction) {
+export function runReaction() {
   if (globalState.batch > 0) {
-    globalState.pendingReactions.push(reaction)
     return
   }
-  reaction.track()
+  const reactionList = globalState.pendingReactions.slice()
+  globalState.pendingReactions = []
+  reactionList.forEach((reaction) => {
+    reaction.track()
+  })
 }
 
 export function autoRun(cb) {

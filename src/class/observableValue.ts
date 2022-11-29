@@ -29,7 +29,8 @@ export class ObservableValue {
   reportChanged() {
     startBatch()
     this.observing.forEach((reaction) => {
-      runReaction(reaction)
+      globalState.pendingReactions.push(reaction)
+      runReaction()
     })
     endBatch()
   }

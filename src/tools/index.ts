@@ -1,4 +1,4 @@
-import { Reaction } from '../class/reaction.js'
+import { Reaction, runReaction } from '../class/reaction.js'
 interface IGlobaState {
   batch: number
   pendingReactions: Reaction[]
@@ -19,11 +19,7 @@ export function startBatch() {
 
 export function endBatch() {
   if (--globalState.batch === 0) {
-    const reactionList = globalState.pendingReactions.slice()
-    globalState.pendingReactions = []
-    reactionList.forEach((reaction) => {
-      reaction.scheduler()
-    })
+    runReaction()
   }
 }
 
@@ -37,5 +33,18 @@ export function assertAllowChange() {
   if (!globalState.allowStateChange) {
     // throw new Error('observable value must be change in action')
     console.warn('observable value must be change in action')
+  }
+}
+
+export function track(fn, derivation, scope) {
+  try {
+    startBatch()
+    const pre = globalState.reaction
+    globalState.reaction = derivation
+    const result = fn.call(scope)
+    globalState.reaction = pre
+    return result
+  } finally {
+    endBatch()
   }
 }

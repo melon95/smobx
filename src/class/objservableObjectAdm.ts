@@ -1,5 +1,6 @@
 import { observableProxy } from '../proxy.js'
 import { ObservableValue } from './observableValue.js'
+import { ComputedValue } from './computedValue.js'
 
 export class ObservableObjectAdm {
   values = new Map<string, ObservableValue>()
@@ -24,7 +25,7 @@ export class ObservableObjectAdm {
     const discriptor = {
       configmable: true,
       enum: true,
-      writeable: false,
+      writable: false,
       value,
     }
     Object.defineProperty(target, key, discriptor)
@@ -44,6 +45,22 @@ export class ObservableObjectAdm {
     }
     Object.defineProperty(target, key, discriptor)
     this.values.set(key, new ObservableValue(value))
+  }
+
+  defineComputedProperty(key, value) {
+    const target = this.target
+    const discriptor = {
+      configmable: true,
+      enum: true,
+      get: () => {
+        return this.getObservablePropValue(key)
+      },
+    }
+    Object.defineProperty(target, key, discriptor)
+    this.values.set(
+      key,
+      new ComputedValue(value, this.proxy) as unknown as ObservableValue
+    )
   }
 
   getObservablePropValue(key) {
