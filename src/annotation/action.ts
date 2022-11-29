@@ -1,20 +1,29 @@
 import { ObservableObjectAdm } from '../class/objservableObjectAdm.js'
-import { globalState, startBatch, endBatch } from '../tools/index.js'
+import { startBatch, endBatch, allowStateChange } from '../tools/index.js'
 
 let actionId = 0
 function createAction(fn) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return function () {
+    const runInfo = startAction()
+    fn()
+    endAction(runInfo)
+  }
+}
+
+function startAction() {
+  startBatch()
+  const pre = allowStateChange(true)
   const runInfo = {
     id: actionId++,
+    allowStateChange: pre,
   }
-  return function () {
-    startBatch()
-    const pre = globalState.runInfo
-    globalState.runInfo = runInfo
-    fn()
-    globalState.runInfo = pre
-    endBatch()
-  }
+  return runInfo
+}
+
+function endAction(runInfo) {
+  endBatch()
+  allowStateChange(runInfo.allowStateChange)
 }
 
 function extend(key, value, adm: ObservableObjectAdm) {
@@ -35,11 +44,4 @@ export const actionBoundAnnotation = {
   name: 'ACTIONS.BOUND',
   bound: true,
   extend,
-}
-
-export function assertAllowChange() {
-  if (!globalState.runInfo) {
-    // throw new Error('observable value must be change in action')
-    console.warn('observable value must be change in action')
-  }
 }

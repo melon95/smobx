@@ -5,7 +5,6 @@ export class ObservableObjectAdm {
   values = new Map<string, ObservableValue>()
   target
   proxy
-  $adm = true
   constructor(target: any) {
     this.target = target
   }
@@ -21,7 +20,18 @@ export class ObservableObjectAdm {
   }
 
   defineProperty(key: string, value) {
-    const target = this.proxy
+    const target = this.target
+    const discriptor = {
+      configmable: true,
+      enum: true,
+      writeable: false,
+      value,
+    }
+    Object.defineProperty(target, key, discriptor)
+  }
+
+  defineObservableProperty(key, value) {
+    const target = this.target
     const discriptor = {
       configmable: true,
       enum: true,

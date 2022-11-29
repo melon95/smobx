@@ -1,5 +1,9 @@
-import { globalState } from '../tools/index.js'
-import { assertAllowChange } from '../annotation/action.js'
+import {
+  endBatch,
+  globalState,
+  startBatch,
+  assertAllowChange,
+} from '../tools/index.js'
 import { Reaction, runReaction } from '../class/reaction.js'
 
 export class ObservableValue {
@@ -23,10 +27,11 @@ export class ObservableValue {
   }
 
   reportChanged() {
+    startBatch()
     this.observing.forEach((reaction) => {
-      // globalState.pendingReactions.push(reaction)
       runReaction(reaction)
     })
+    endBatch()
   }
 
   recordObserving() {
