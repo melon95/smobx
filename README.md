@@ -10,7 +10,7 @@
   - [ ] 嵌套转化 Observable
   - [ ] 对更新值进行转化
   
-- [ ] Computed
+- [x] Computed
 - [x] Action
 - [x] Reaction
 
